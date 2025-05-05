@@ -1,18 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Balancing Robot Controller</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Balancing Robot Controller</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 48%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
 </head>
 <body>
-  <h2>PID Tuning</h2>
-  <label>Kp: <input type="number" id="kp" step="0.01" /></label><br />
-  <label>Ki: <input type="number" id="ki" step="0.01" /></label><br />
-  <label>Kd: <input type="number" id="kd" step="0.01" /></label><br />
-  <label>Offset Angle: <input type="number" id="offset" step="0.1" /></label><br />
-  <label>Desired Angle: <input type="number" id="target" step="0.1" /></label><br />
-  <button onclick="connect()">Connect Bluetooth</button>
-  <button onclick="sendParams()">Send Parameters</button>
+  <div class="container">
+    <h2>PID Tuning</h2>
+    <label for="kp">Kp:<input type="number" id="kp" step="0.01" /></label>
+    <label for="ki">Ki:<input type="number" id="ki" step="0.01" /></label>
+    <label for="kd">Kd:<input type="number" id="kd" step="0.01" /></label>
+    <label for="offset">Offset Angle:<input type="number" id="offset" step="0.1" /></label>
+    <label for="target">Desired Angle:<input type="number" id="target" step="0.1" /></label>
+    <div class="button-group">
+      <button onclick="connect()">Connect Bluetooth</button>
+      <button onclick="sendParams()">Send Parameters</button>
+    </div>
+  </div>
 
   <script>
     let device, characteristic;
@@ -33,14 +90,19 @@
     }
 
     function sendParams() {
-      if (!characteristic) return alert("Not connected");
-      const kp = document.getElementById('kp').value;
-      const ki = document.getElementById('ki').value;
-      const kd = document.getElementById('kd').value;
-      const offset = document.getElementById('offset').value;
-      const target = document.getElementById('target').value;
-      const msg = `K:${kp},${ki},${kd},${offset},${target}\n`;
-      characteristic.writeValue(new TextEncoder().encode(msg));
+      if (!characteristic) {
+        alert("Not connected.");
+        return;
+      }
+      const kp = document.getElementById("kp").value;
+      const ki = document.getElementById("ki").value;
+      const kd = document.getElementById("kd").value;
+      const offset = document.getElementById("offset").value;
+      const target = document.getElementById("target").value;
+
+      const data = `PID:${kp},${ki},${kd},${offset},${target}\n`;
+      const encoder = new TextEncoder();
+      characteristic.writeValue(encoder.encode(data));
     }
   </script>
 </body>
