@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Balancing Robot Controller&lt;/title&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;h2&gt;PID Tuning&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;label&gt;Kp: &lt;input type="number" id="kp" value="15"&gt;&lt;/label&gt;&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;label&gt;Ki: &lt;input type="number" id="ki" value="0.5"&gt;&lt;/label&gt;&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;label&gt;Kd: &lt;input type="number" id="kd" value="0.2"&gt;&lt;/label&gt;&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;label&gt;Offset Angle: &lt;input type="number" id="offset" value="0"&gt;&lt;/label&gt;&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;label&gt;Desired Angle: &lt;input type="number" id="desired" value="0"&gt;&lt;/label&gt;&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button onclick="sendPID()"&gt;Send to Robot&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;br&gt;&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button onclick="connect()"&gt;Connect Bluetooth&lt;/button&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let device, writer;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>async function connect() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>device = await navigator.bluetooth.requestDevice({</p>
+<p class="p1"><span class="Apple-converted-space">        </span>acceptAllDevices: true,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>optionalServices: [0x1101] // Serial Port</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const server = await device.gatt.connect();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const service = await server.getPrimaryService(0x1101);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const characteristic = await service.getCharacteristic(0x2A00);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>writer = characteristic;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>async function sendPID() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!writer) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>alert("Bluetooth not connected!");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let kp = document.getElementById("kp").value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let ki = document.getElementById("ki").value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let kd = document.getElementById("kd").value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let offset = document.getElementById("offset").value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let desired = document.getElementById("desired").value;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>let command = `KP:${kp} KI:${ki} KD:${kd} OFFSET:${offset} DESIRED:${desired}\n`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const encoder = new TextEncoder();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const data = encoder.encode(command);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>await writer.writeValue(data);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
