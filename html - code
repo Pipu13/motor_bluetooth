@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Balancing Robot Controller</title>
+</head>
+<body>
+  <h2>PID Tuning</h2>
+  <label>Kp: <input type="number" id="kp" value="15"></label><br>
+  <label>Ki: <input type="number" id="ki" value="0.5"></label><br>
+  <label>Kd: <input type="number" id="kd" value="0.2"></label><br>
+  <label>Offset Angle: <input type="number" id="offset" value="0"></label><br>
+  <label>Desired Angle: <input type="number" id="desired" value="0"></label><br>
+  <button onclick="sendPID()">Send to Robot</button>
+  <br><br>
+  <button onclick="connect()">Connect Bluetooth</button>
+
+  <script>
+    let device, writer;
+
+    async function connect() {
+      device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: [0x1101] // Serial Port
+      });
+
+      const server = await device.gatt.connect();
+      const service = await server.getPrimaryService(0x1101);
+      const characteristic = await service.getCharacteristic(0x2A00);
+      writer = characteristic;
+    }
+
+    async function sendPID() {
+      if (!writer) {
+        alert("Bluetooth not connected!");
+        return;
+      }
+
+      let kp = document.getElementById("kp").value;
+      let ki = document.getElementById("ki").value;
+      let kd = document.getElementById("kd").value;
+      let offset = document.getElementById("offset").value;
+      let desired = document.getElementById("desired").value;
+
+      let command = `KP:${kp} KI:${ki} KD:${kd} OFFSET:${offset} DESIRED:${desired}\n`;
+
+      const encoder = new TextEncoder();
+      const data = encoder.encode(command);
+      await writer.writeValue(data);
+    }
+  </script>
+</body>
+</html>
